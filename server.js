@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 
 const MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/";
-const DETAILS_URL = "https://store.steampowered.com/api/appdetails?appids=";
+const DETAILS_URL = "https://store.steampowered.com/api/appdetails?cc=eu&appids=";
 
 const headers = {
   "User-Agent": "Mozilla/5.0",
