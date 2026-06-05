@@ -21,25 +21,26 @@ app.get('/api/mostplayed', async (req, res) => {
 
     const ranks = data.response.ranks;
 
-    const finalGames = [];
+    const detailRequests = ranks.map(game =>
+      fetch(DETAILS_URL + game.appid, { headers })
+        .then(r => r.json())
+        .then(json => {
+          const details = json[game.appid]?.data;
+          if (!details) return null;
 
-    for (const game of ranks) {
-      const appid = game.appid;
+          return {
+            appid: game.appid,
+            name: details.name,
+            peak: game.peak_in_game,
+            image: details.capsule_imagev5 || details.capsule_image || details.header_image
+          };
+        })
+        .catch(() => null)
+    );
 
-      const detailsRes = await fetch(DETAILS_URL + appid, { headers });
-      const detailsJson = await detailsRes.json();
+    const results = await Promise.all(detailRequests);
 
-      const details = detailsJson[appid]?.data;
-
-      if (!details) continue;
-
-      finalGames.push({
-        appid: appid,
-        name: details.name,
-        peak: game.peak_in_game,
-        image: details.capsule_imagev5 || details.capsule_image || details.header_image
-      });
-    }
+    const finalGames = results.filter(g => g !== null);
 
     res.json(finalGames);
 
