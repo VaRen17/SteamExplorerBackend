@@ -32,7 +32,11 @@ app.get('/api/mostplayed', async (req, res) => {
             appid: game.appid,
             name: details.name,
             peak: game.peak_in_game,
-            image: details.capsule_imagev5 || details.capsule_image || details.header_image
+            image: details.capsule_imagev5 || details.capsule_image || details.header_image,
+            price: details.price_overview?.final ?? 0,
+            initialPrice: details.price_overview?.initial ?? 0,
+            discount: details.price_overview?.discount_percent ?? 0,
+            currency: details.price_overview?.currency ?? "EUR"
           };
         })
         .catch(() => null)
