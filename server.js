@@ -6,7 +6,8 @@ const app = express();
 app.use(cors());
 
 const MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/";
-const DETAILS_URL = "https://store.steampowered.com/api/appdetails?cc=eu&appids=";
+const HOME_URL = "https://store.steampowered.com/api/appdetails?cc=eu&appids=";
+const DETAIL_URL = "https://store.steampowered.com/api/appdetails?appids=";
 
 const headers = {
   "User-Agent": "Mozilla/5.0",
@@ -22,7 +23,7 @@ app.get('/api/mostplayed', async (req, res) => {
     const ranks = data.response.ranks;
 
     const detailRequests = ranks.map(game =>
-      fetch(DETAILS_URL + game.appid, { headers })
+      fetch(HOME_URL + game.appid, { headers })
         .then(r => r.json())
         .then(json => {
           const details = json[game.appid]?.data;
@@ -57,7 +58,7 @@ app.get('/api/mostplayed', async (req, res) => {
 app.get('/api/details/:id', async (req, res) => {
   const appId = req.params.id;
   try {
-    const response = await fetch(DETAILS_URL + appId, { headers });
+    const response = await fetch(DETAIL_URL + appId, { headers });
     const data = await response.json();
     res.json(data);
   } catch (err) {
