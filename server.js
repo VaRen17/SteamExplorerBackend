@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-const MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/";
+const MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/?count=500";
 const HOME_URL = "https://store.steampowered.com/api/appdetails?cc=eu&appids=";
 const DETAIL_URL = "https://store.steampowered.com/api/appdetails?appids=";
 
@@ -30,15 +30,16 @@ app.get('/api/mostplayed', async (req, res) => {
           if (!details) return null;
 
           return {
-            appid: game.appid,
-            name: details.name,
-            peak: game.peak_in_game,
-            image: details.capsule_imagev5 || details.capsule_image || details.header_image,
-            price: details.price_overview?.final ?? 0,
-            initialPrice: details.price_overview?.initial ?? 0,
-            discount: details.price_overview?.discount_percent ?? 0,
-            currency: details.price_overview?.currency ?? "EUR"
-          };
+          appid: game.appid,
+          name: details.name,
+          peak: game.peak_in_game,
+          image: details.capsule_imagev5 || details.capsule_image || details.header_image,
+          price: details.price_overview?.final ?? 0,
+          initialPrice: details.price_overview?.initial ?? 0,
+          discount: details.price_overview?.discount_percent ?? 0,
+          currency: details.price_overview?.currency ?? "EUR",
+          genres: details.genres?.map(g => g.description) ?? []
+        };
         })
         .catch(() => null)
     );
