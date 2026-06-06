@@ -17,35 +17,39 @@ const headers = {
 
 app.get('/api/mostplayed', async (req, res) => {
   try {
-    const response = await fetch(MOST_PLAYED_URL, { headers });
+    const proxyMostPlayed = `https://api.allorigins.win/raw?url=${encodeURIComponent(MOST_PLAYED_URL)}`;
+
+    const response = await fetch(proxyMostPlayed, { headers });
     const data = await response.json();
 
     const ranks = data.response.ranks;
 
-    const detailRequests = ranks.map(game =>
-      fetch(HOME_URL + game.appid, { headers })
+    const detailRequests = ranks.map(game => {
+      const steamDetailUrl = HOME_URL + game.appid;
+      const proxyDetailUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(steamDetailUrl)}`;
+
+      return fetch(proxyDetailUrl, { headers })
         .then(r => r.json())
         .then(json => {
           const details = json[game.appid]?.data;
           if (!details) return null;
 
           return {
-          appid: game.appid,
-          name: details.name,
-          peak: game.peak_in_game,
-          image: details.capsule_imagev5 || details.capsule_image || details.header_image,
-          price: details.price_overview?.final ?? 0,
-          initialPrice: details.price_overview?.initial ?? 0,
-          discount: details.price_overview?.discount_percent ?? 0,
-          currency: details.price_overview?.currency ?? "EUR",
-          genres: details.genres?.map(g => g.description) ?? []
-        };
+            appid: game.appid,
+            name: details.name,
+            peak: game.peak_in_game,
+            image: details.capsule_imagev5 || details.capsule_image || details.header_image,
+            price: details.price_overview?.final ?? 0,
+            initialPrice: details.price_overview?.initial ?? 0,
+            discount: details.price_overview?.discount_percent ?? 0,
+            currency: details.price_overview?.currency ?? "EUR",
+            genres: details.genres?.map(g => g.description) ?? []
+          };
         })
-        .catch(() => null)
-    );
+        .catch(() => null);
+    });
 
     const results = await Promise.all(detailRequests);
-
     const finalGames = results.filter(g => g !== null);
 
     res.json(finalGames);
@@ -58,11 +62,18 @@ app.get('/api/mostplayed', async (req, res) => {
 
 app.get('/api/details/:id', async (req, res) => {
   const appId = req.params.id;
+
   try {
-    const response = await fetch(DETAIL_URL + appId, { headers });
+    const steamDetailUrl = DETAIL_URL + appId;
+    const proxyDetailUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(steamDetailUrl)}`;
+
+    const response = await fetch(proxyDetailUrl, { headers });
     const data = await response.json();
+
     res.json(data);
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Steam API error" });
   }
 });
