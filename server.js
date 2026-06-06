@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
+const PROXY = "https://long-bar-48ae.ferenczvargaakos.workers.dev/?url=";
 
 const MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/?count=500";
 const HOME_URL = "https://store.steampowered.com/api/appdetails?cc=eu&appids=";
@@ -17,7 +18,7 @@ const headers = {
 
 app.get('/api/mostplayed', async (req, res) => {
   try {
-    const proxyMostPlayed = `https://api.allorigins.win/raw?url=${encodeURIComponent(MOST_PLAYED_URL)}`;
+    const proxyMostPlayed = PROXY + encodeURIComponent(MOST_PLAYED_URL);
 
     const response = await fetch(proxyMostPlayed, { headers });
     const data = await response.json();
@@ -26,7 +27,7 @@ app.get('/api/mostplayed', async (req, res) => {
 
     const detailRequests = ranks.map(game => {
       const steamDetailUrl = HOME_URL + game.appid;
-      const proxyDetailUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(steamDetailUrl)}`;
+      const proxyDetailUrl = PROXY + encodeURIComponent(steamDetailUrl);
 
       return fetch(proxyDetailUrl, { headers })
         .then(r => r.json())
@@ -65,7 +66,7 @@ app.get('/api/details/:id', async (req, res) => {
 
   try {
     const steamDetailUrl = DETAIL_URL + appId;
-    const proxyDetailUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(steamDetailUrl)}`;
+    const proxyDetailUrl = PROXY + encodeURIComponent(steamDetailUrl);
 
     const response = await fetch(proxyDetailUrl, { headers });
     const data = await response.json();
